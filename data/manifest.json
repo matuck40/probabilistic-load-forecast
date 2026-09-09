@@ -1,0 +1,54 @@
+{
+  "dataset": "ONS - Curva de Carga Horaria",
+  "dataset_page": "https://dados.ons.org.br/dataset/curva-carga",
+  "license": "CC BY 4.0",
+  "attribution": "Operador Nacional do Sistema Eletrico (ONS), Dados Abertos",
+  "data_dictionary": {
+    "json": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/DicionarioDados_CurvaCarga.json",
+    "pdf": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/DicionarioDados_CurvaCarga.pdf"
+  },
+  "columns": {
+    "id_subsistema": "subsystem code, 3 characters",
+    "nom_subsistema": "subsystem name; its content changed in dictionary v1.2 (2026-04-06), so join on id_subsistema instead",
+    "din_instante": "reference timestamp, YYYY-MM-DD HH:MM:SS",
+    "val_cargaenergiahomwmed": "load in MWmed (mean power over the hour)"
+  },
+  "files": {
+    "CURVA_CARGA_2021.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2021.csv",
+      "sha256": "b5d76ab85a6807479e054c1b3ac6462838ae4d8ced7c42f0f43e2c101b958345",
+      "bytes": 1539096,
+      "retrieved_at": "2026-09-09T23:27:06+00:00"
+    },
+    "CURVA_CARGA_2022.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2022.csv",
+      "sha256": "d56a7b23d4f987d862ce8268584907b372d3e79bfc241d5e46fd6bb4ed0fefaa",
+      "bytes": 1538114,
+      "retrieved_at": "2026-09-09T23:27:08+00:00"
+    },
+    "CURVA_CARGA_2023.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2023.csv",
+      "sha256": "3a7e07005bd991ade3cccf402b21737564713230f777e1bcda06b9c6e9a78096",
+      "bytes": 1539769,
+      "retrieved_at": "2026-09-09T23:27:10+00:00"
+    },
+    "CURVA_CARGA_2024.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2024.csv",
+      "sha256": "0c7e02591887591ec0a1e758eeb744dcd24c69e91c09e032ce7772838676cc32",
+      "bytes": 1545226,
+      "retrieved_at": "2026-09-09T23:27:12+00:00"
+    },
+    "CURVA_CARGA_2025.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2025.csv",
+      "sha256": "69a3d2560bf111e46d1fa356ee4be7c917ca89bf53ae16ab1af9f9e7477ff4c4",
+      "bytes": 1416029,
+      "retrieved_at": "2026-09-09T23:27:14+00:00"
+    },
+    "CURVA_CARGA_2026.csv": {
+      "url": "https://ons-aws-prod-opendata.s3.amazonaws.com/dataset/curva-carga-ho/CURVA_CARGA_2026.csv",
+      "sha256": "725b185ccf154a0696c31752b76ecf2b77af7282b883e3ec2dd6dc2d62d3b4c0",
+      "bytes": 1118672,
+      "retrieved_at": "2026-09-09T23:27:15+00:00"
+    }
+  }
+}

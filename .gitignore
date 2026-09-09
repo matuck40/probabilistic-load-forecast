@@ -1,0 +1,15 @@
+# Raw data is downloaded, never committed. See data/download.py and data/manifest.json.
+data/raw/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# Private study notes, not part of the repository (Bloco 7)
+NOTAS-PARA-ENTREVISTA.md

@@ -4,6 +4,12 @@ Horizons whose main lags, same-hour-dow lags, and same-hour-7d lags all agree
 see exactly the same information at the forecast origin and share one fitted
 model; see `LightGBMForecaster.signature_for` and `.fit`.
 
+Maintenance note: `signature_for` is built from those three lag tuples alone,
+so a future column added to `build_features` that is not driven by one of
+them must be reflected in `signature_for` too -- `predict`'s column-name
+guard cannot catch that omission on its own, because an aggregate column's
+name does not change just because the lags feeding it did.
+
 The loss function matters more than the hyperparameters here. Training in MW
 under squared error spends the model's capacity on the high-load hours; the
 metric that is reported is WAPE, so absolute error is the closer match. Both are

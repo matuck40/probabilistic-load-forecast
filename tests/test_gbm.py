@@ -173,3 +173,42 @@ def test_predict_routes_each_hour_to_its_own_horizon_model():
         assert (predictions.loc[hours, "q0.5"] == expected).all(), (
             f"horizon {horizon} (hour {horizon - 1}) did not route to its own model"
         )
+
+
+def test_predict_raises_on_a_column_mismatch_with_the_fitted_model():
+    """Prove predict's column guard actually fires on a genuine mismatch.
+
+    The guard exists for a future features.py change that alters
+    build_features's *column names* for a horizon without signature_for
+    noticing. The most direct real-world version of that would seem to be
+    monkeypatching features.SAME_HOUR_7D_LAGS between fit and predict, but
+    that specifically does NOT trip the guard -- confirmed by trying it
+    before writing this test: SAME_HOUR_7D_LAGS only feeds the single
+    "mean_same_hour_7d" aggregate column, whose *name* is the same no matter
+    which lags feed it (this is exactly fix round 2's Finding 1, and now the
+    module docstring's maintenance note). Changing that lag list changes the
+    column's values, not build_features's `tuple(X.columns)`, so the guard --
+    which compares column names, not values -- has nothing to catch. That
+    is the guard's documented limitation, not a bug to fix here.
+
+    So this test stands in for the case the guard *can* catch instead: a
+    future build_features change that does alter the column names for one
+    signature (a reordered/renamed/added column not driven by any of the
+    three lag tuples) without signature_for or feature_columns noticing.
+    Simulated directly here by corrupting `feature_columns` for horizon 1's
+    signature after a real fit, since reproducing an actual such
+    features.py change is out of scope for this round.
+    """
+    series = _series()
+    train = series.iloc[:5000]
+    model = LightGBMForecaster(objective="l1", params={"n_estimators": 10, "num_leaves": 7})
+    model.fit(train)
+
+    horizon = 1
+    signature = model.signature_of[horizon]
+    trained_columns = model.feature_columns[signature]
+    model.feature_columns[signature] = (*trained_columns[:-1], "a_column_predict_will_never_build")
+
+    test_index = series.index[5000:5024]
+    with pytest.raises(AssertionError, match=f"horizon {horizon}"):
+        model.predict(series, test_index)

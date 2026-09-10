@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from src import features
 from src.features import available_lags, build_features
 
 
@@ -17,6 +18,20 @@ def test_available_lags_respects_the_rule():
     for horizon in range(1, 25):
         for lag in available_lags(horizon):
             assert lag >= horizon, f"lag {lag} is not known at horizon {horizon}"
+
+
+def test_available_lags_excludes_lags_shorter_than_the_horizon(monkeypatch):
+    """The filter itself must be exercised.
+
+    With the real LAGS (min 24) every horizon (max 24) passes trivially, so
+    `available_lags` could return LAGS unconditionally and the other tests
+    would not notice. Monkeypatch LAGS to include a lag shorter than a chosen
+    horizon and check that it is actually dropped, and that a shorter horizon
+    keeps it.
+    """
+    monkeypatch.setattr(features, "LAGS", (6, 24, 168))
+    assert available_lags(12) == (24, 168)
+    assert available_lags(1) == (6, 24, 168)
 
 
 def test_features_and_target_are_aligned_and_finite():
@@ -73,6 +88,39 @@ def test_no_leakage_is_actually_detectable():
     with pytest.raises(AssertionError):
         pd.testing.assert_series_equal(
             leaking_original.loc[rows], leaking_corrupted.loc[rows], check_exact=True
+        )
+
+
+def test_no_leakage_check_catches_a_forward_reading_column_in_a_real_frame():
+    """Certify the exact comparison above, applied to a frame of the real shape.
+
+    `test_no_leakage_is_actually_detectable` only proves `assert_series_equal`
+    can fail on a hand-built series; it never calls `build_features` and never
+    uses `assert_frame_equal`. This splices one deliberately forward-reading
+    column into real `build_features` output and re-runs the same
+    `assert_frame_equal(..., check_exact=True)` the real leakage test performs.
+    """
+    series = _series()
+    cut = series.index[1000]
+    corrupted = series.copy()
+    corrupted.loc[corrupted.index > cut] = 999999.0
+
+    horizon = 12
+    original_X, _ = build_features(series, horizon=horizon)
+    corrupted_X, _ = build_features(corrupted, horizon=horizon)
+
+    original_X = original_X.copy()
+    corrupted_X = corrupted_X.copy()
+    original_X["peek"] = series.shift(-1).reindex(original_X.index)
+    corrupted_X["peek"] = corrupted.shift(-1).reindex(corrupted_X.index)
+
+    rows = original_X.index[original_X.index <= cut]
+    assert len(rows) > 100, "the test needs a meaningful number of rows"
+    with pytest.raises(AssertionError):
+        pd.testing.assert_frame_equal(
+            original_X.loc[rows],
+            corrupted_X.loc[rows],
+            check_exact=True,
         )
 
 

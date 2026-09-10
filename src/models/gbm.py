@@ -1,10 +1,10 @@
 """LightGBM with one model per distinct lag signature, not per horizon.
 
-Horizons whose main lags, same-hour-dow lags, and same-hour-7d lags all agree
-see exactly the same information at the forecast origin and share one fitted
-model; see `LightGBMForecaster.signature_for` and `.fit`.
+Horizons whose main lags, same-hour-dow lags, same-hour-7d lags, and ramp lags
+all agree see exactly the same information at the forecast origin and share
+one fitted model; see `LightGBMForecaster.signature_for` and `.fit`.
 
-Maintenance note: `signature_for` is built from those three lag tuples alone,
+Maintenance note: `signature_for` is built from those four lag tuples alone,
 so a future column added to `build_features` that is not driven by one of
 them must be reflected in `signature_for` too -- `predict`'s column-name
 guard cannot catch that omission on its own, because an aggregate column's
@@ -40,24 +40,26 @@ DEFAULT_PARAMS = {
     "force_col_wise": True,
 }
 
-# (main lags, same-hour-dow lags, same-hour-7d lags), each already filtered by
-# the `L >= h` rule for one horizon. All three matter: build_features folds
-# the last two into aggregate columns ("mean_same_hour_dow_4w",
-# "std_same_hour_dow_4w", "mean_same_hour_7d") whose names never change no
-# matter which lags feed them, so a signature built from the main lags alone
-# could merge two horizons that are secretly fed different information.
-Signature = tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]
+# (main lags, same-hour-dow lags, same-hour-7d lags, ramp lags), each already
+# filtered by the `L >= h` rule for one horizon. All four matter: build_features
+# folds the last three into aggregate columns ("mean_same_hour_dow_4w",
+# "std_same_hour_dow_4w", "mean_same_hour_7d", "ramp_168") whose names never
+# change no matter which lags feed them, so a signature built from the main
+# lags alone could merge two horizons that are secretly fed different
+# information.
+Signature = tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...], tuple[int, ...]]
 
 
 def _filter_lags(lags: tuple[int, ...], horizon: int) -> tuple[int, ...]:
     """The same `L >= h` rule as `features._usable`, duplicated here.
 
-    `SAME_HOUR_DOW_LAGS` and `SAME_HOUR_7D_LAGS` have no public accessor of
-    their own (unlike `LAGS`, via `available_lags`), and this file may not add
-    one this round. The rule is one line, so duplicating it is cheap; reading
-    `features.SAME_HOUR_DOW_LAGS`/`features.SAME_HOUR_7D_LAGS` as module
-    attributes (rather than importing them by name) means a monkeypatched
-    value is picked up here exactly as `build_features` itself would see it.
+    `SAME_HOUR_DOW_LAGS`, `SAME_HOUR_7D_LAGS`, and `RAMP_LAGS` have no public
+    accessor of their own (unlike `LAGS`, via `available_lags`), and this file
+    may not add one this round. The rule is one line, so duplicating it is
+    cheap; reading `features.SAME_HOUR_DOW_LAGS`/`features.SAME_HOUR_7D_LAGS`/
+    `features.RAMP_LAGS` as module attributes (rather than importing them by
+    name) means a monkeypatched value is picked up here exactly as
+    `build_features` itself would see it.
     """
     return tuple(lag for lag in lags if lag >= horizon)
 
@@ -94,16 +96,17 @@ class LightGBMForecaster(Forecaster):
     def signature_for(self, horizon: int) -> Signature:
         """The full lag signature `build_features` would use for `horizon`.
 
-        Combines all three lag lists `build_features` filters -- `LAGS` (via
-        the public `available_lags`), `SAME_HOUR_DOW_LAGS`, and
-        `SAME_HOUR_7D_LAGS` -- not just the main lags, so two horizons only
-        share a model when every column of `build_features`'s output would
-        actually be built from the same underlying lags.
+        Combines all four lag lists `build_features` filters -- `LAGS` (via
+        the public `available_lags`), `SAME_HOUR_DOW_LAGS`, `SAME_HOUR_7D_LAGS`,
+        and `RAMP_LAGS` -- not just the main lags, so two horizons only share a
+        model when every column of `build_features`'s output would actually be
+        built from the same underlying lags.
         """
         return (
             available_lags(horizon),
             _filter_lags(features.SAME_HOUR_DOW_LAGS, horizon),
             _filter_lags(features.SAME_HOUR_7D_LAGS, horizon),
+            _filter_lags(features.RAMP_LAGS, horizon),
         )
 
     def model_for(self, horizon: int, target: str) -> lgb.LGBMRegressor:

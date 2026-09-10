@@ -20,6 +20,13 @@ LAGS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 168, 336, 504, 672)
 SAME_HOUR_DOW_LAGS = (168, 336, 504, 672)
 SAME_HOUR_7D_LAGS = (24, 48, 72, 96, 120, 144, 168)
 
+# The hour just after and just before the same hour, last week (168 +/- 1).
+# error_analysis on the real six-fold run showed the model's worst single
+# segment is hour 14, sitting inside a cluster of bad late-morning/afternoon
+# hours (9-16): the daytime ramp, where whether load was still climbing or
+# already falling matters and a single same-hour lag cannot say which.
+RAMP_LAGS = (167, 169)
+
 
 def _usable(lags: tuple[int, ...], horizon: int) -> tuple[int, ...]:
     """The single definition of the L >= h rule.
@@ -59,7 +66,8 @@ def build_features(series: pd.Series, horizon: int) -> tuple[pd.DataFrame, pd.Se
     usable = available_lags(horizon)
     dow_lags = _usable(SAME_HOUR_DOW_LAGS, horizon)
     week_lags = _usable(SAME_HOUR_7D_LAGS, horizon)
-    _check_no_leakage((*usable, *dow_lags, *week_lags), horizon)
+    ramp_lags = _usable(RAMP_LAGS, horizon)
+    _check_no_leakage((*usable, *dow_lags, *week_lags, *ramp_lags), horizon)
 
     columns: dict[str, pd.Series] = {}
     for lag in usable:
@@ -70,6 +78,10 @@ def build_features(series: pd.Series, horizon: int) -> tuple[pd.DataFrame, pd.Se
     columns["std_same_hour_dow_4w"] = dow_frame.std(axis=1)
 
     columns["mean_same_hour_7d"] = pd.concat([series.shift(lag) for lag in week_lags], axis=1).mean(axis=1)
+
+    if len(ramp_lags) == 2:
+        after, before = ramp_lags
+        columns["ramp_168"] = series.shift(after) - series.shift(before)
 
     X = pd.DataFrame(columns, index=series.index)
 

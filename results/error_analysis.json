@@ -1,0 +1,636 @@
+{
+  "before": [
+    {
+      "segment": "hour",
+      "bucket": 0,
+      "n": 546,
+      "wape": 0.007163322653648847,
+      "ratio_to_overall": 0.33854029539922426
+    },
+    {
+      "segment": "hour",
+      "bucket": 1,
+      "n": 546,
+      "wape": 0.010377901664715413,
+      "ratio_to_overall": 0.49046204744208144
+    },
+    {
+      "segment": "hour",
+      "bucket": 2,
+      "n": 546,
+      "wape": 0.011231222643824491,
+      "ratio_to_overall": 0.530790195468583
+    },
+    {
+      "segment": "hour",
+      "bucket": 3,
+      "n": 546,
+      "wape": 0.01381162678157742,
+      "ratio_to_overall": 0.6527406954365382
+    },
+    {
+      "segment": "hour",
+      "bucket": 4,
+      "n": 546,
+      "wape": 0.014762376909572316,
+      "ratio_to_overall": 0.6976733677095497
+    },
+    {
+      "segment": "hour",
+      "bucket": 5,
+      "n": 546,
+      "wape": 0.015422503880612476,
+      "ratio_to_overall": 0.7288711219616348
+    },
+    {
+      "segment": "hour",
+      "bucket": 6,
+      "n": 546,
+      "wape": 0.016784566988559638,
+      "ratio_to_overall": 0.7932425413729797
+    },
+    {
+      "segment": "hour",
+      "bucket": 7,
+      "n": 546,
+      "wape": 0.019137585168120304,
+      "ratio_to_overall": 0.9044467280477829
+    },
+    {
+      "segment": "hour",
+      "bucket": 8,
+      "n": 546,
+      "wape": 0.023093779002937128,
+      "ratio_to_overall": 1.091417369222692
+    },
+    {
+      "segment": "hour",
+      "bucket": 9,
+      "n": 546,
+      "wape": 0.026082612265677412,
+      "ratio_to_overall": 1.2326703246723134
+    },
+    {
+      "segment": "hour",
+      "bucket": 10,
+      "n": 546,
+      "wape": 0.027677412659871975,
+      "ratio_to_overall": 1.3080409623858624
+    },
+    {
+      "segment": "hour",
+      "bucket": 11,
+      "n": 546,
+      "wape": 0.027396294412850568,
+      "ratio_to_overall": 1.294755248620022
+    },
+    {
+      "segment": "hour",
+      "bucket": 12,
+      "n": 546,
+      "wape": 0.029430339865775583,
+      "ratio_to_overall": 1.3908847100142987
+    },
+    {
+      "segment": "hour",
+      "bucket": 13,
+      "n": 546,
+      "wape": 0.030459421669749298,
+      "ratio_to_overall": 1.4395193555205663
+    },
+    {
+      "segment": "hour",
+      "bucket": 14,
+      "n": 546,
+      "wape": 0.031617801418683276,
+      "ratio_to_overall": 1.4942646519911686
+    },
+    {
+      "segment": "hour",
+      "bucket": 15,
+      "n": 546,
+      "wape": 0.030413837393455295,
+      "ratio_to_overall": 1.4373650320161977
+    },
+    {
+      "segment": "hour",
+      "bucket": 16,
+      "n": 546,
+      "wape": 0.027375087020085346,
+      "ratio_to_overall": 1.293752982303325
+    },
+    {
+      "segment": "hour",
+      "bucket": 17,
+      "n": 546,
+      "wape": 0.0199254657142157,
+      "ratio_to_overall": 0.9416821459831416
+    },
+    {
+      "segment": "hour",
+      "bucket": 18,
+      "n": 546,
+      "wape": 0.016787689969019495,
+      "ratio_to_overall": 0.7933901341561789
+    },
+    {
+      "segment": "hour",
+      "bucket": 19,
+      "n": 546,
+      "wape": 0.017340262544795742,
+      "ratio_to_overall": 0.8195048426619465
+    },
+    {
+      "segment": "hour",
+      "bucket": 20,
+      "n": 546,
+      "wape": 0.018546487600673005,
+      "ratio_to_overall": 0.8765113194715072
+    },
+    {
+      "segment": "hour",
+      "bucket": 21,
+      "n": 546,
+      "wape": 0.019985035348391085,
+      "ratio_to_overall": 0.9444974207551479
+    },
+    {
+      "segment": "hour",
+      "bucket": 22,
+      "n": 546,
+      "wape": 0.021747393023377314,
+      "ratio_to_overall": 1.0277868545467441
+    },
+    {
+      "segment": "hour",
+      "bucket": 23,
+      "n": 546,
+      "wape": 0.023676387645976744,
+      "ratio_to_overall": 1.1189515892562272
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 0,
+      "n": 1872,
+      "wape": 0.023222263159648718,
+      "ratio_to_overall": 1.0974895603650394
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 1,
+      "n": 1872,
+      "wape": 0.020705652930101497,
+      "ratio_to_overall": 0.9785539753426827
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 2,
+      "n": 1872,
+      "wape": 0.021029924351881196,
+      "ratio_to_overall": 0.9938791181886366
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 3,
+      "n": 1872,
+      "wape": 0.020088671296537033,
+      "ratio_to_overall": 0.9493952797789119
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 4,
+      "n": 1872,
+      "wape": 0.02020054544105737,
+      "ratio_to_overall": 0.954682477880223
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 5,
+      "n": 1872,
+      "wape": 0.02076128568565402,
+      "ratio_to_overall": 0.9811831923149255
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 6,
+      "n": 1872,
+      "wape": 0.02226089432697442,
+      "ratio_to_overall": 1.0520550456380808
+    },
+    {
+      "segment": "month",
+      "bucket": 1,
+      "n": 1488,
+      "wape": 0.024773807666454494,
+      "ratio_to_overall": 1.1708159147756585
+    },
+    {
+      "segment": "month",
+      "bucket": 2,
+      "n": 1344,
+      "wape": 0.02063536521369823,
+      "ratio_to_overall": 0.9752321615106646
+    },
+    {
+      "segment": "month",
+      "bucket": 3,
+      "n": 1488,
+      "wape": 0.019398677955903946,
+      "ratio_to_overall": 0.9167860339504503
+    },
+    {
+      "segment": "month",
+      "bucket": 4,
+      "n": 1440,
+      "wape": 0.02061839315339532,
+      "ratio_to_overall": 0.9744300579916289
+    },
+    {
+      "segment": "month",
+      "bucket": 5,
+      "n": 1488,
+      "wape": 0.01915530913271939,
+      "ratio_to_overall": 0.9052843667388117
+    },
+    {
+      "segment": "month",
+      "bucket": 6,
+      "n": 1440,
+      "wape": 0.021124564626648287,
+      "ratio_to_overall": 0.9983518395953702
+    },
+    {
+      "segment": "month",
+      "bucket": 7,
+      "n": 744,
+      "wape": 0.014206981332441061,
+      "ratio_to_overall": 0.6714252435028784
+    },
+    {
+      "segment": "month",
+      "bucket": 8,
+      "n": 744,
+      "wape": 0.013322726142211087,
+      "ratio_to_overall": 0.6296351374609193
+    },
+    {
+      "segment": "month",
+      "bucket": 9,
+      "n": 720,
+      "wape": 0.022321906843149594,
+      "ratio_to_overall": 1.054938511349132
+    },
+    {
+      "segment": "month",
+      "bucket": 10,
+      "n": 744,
+      "wape": 0.025724689251709718,
+      "ratio_to_overall": 1.215754799749381
+    },
+    {
+      "segment": "month",
+      "bucket": 11,
+      "n": 720,
+      "wape": 0.023707502662941207,
+      "ratio_to_overall": 1.1204220921979222
+    },
+    {
+      "segment": "month",
+      "bucket": 12,
+      "n": 744,
+      "wape": 0.028710600872933978,
+      "ratio_to_overall": 1.3568696777411366
+    },
+    {
+      "segment": "holiday",
+      "bucket": 0,
+      "n": 12576,
+      "wape": 0.020830695009121998,
+      "ratio_to_overall": 0.9844634930924341
+    },
+    {
+      "segment": "holiday",
+      "bucket": 1,
+      "n": 528,
+      "wape": 0.029514748859432522,
+      "ratio_to_overall": 1.394873898695115
+    }
+  ],
+  "after": [
+    {
+      "segment": "hour",
+      "bucket": 0,
+      "n": 546,
+      "wape": 0.0065875037990371955,
+      "ratio_to_overall": 0.3117456543342503
+    },
+    {
+      "segment": "hour",
+      "bucket": 1,
+      "n": 546,
+      "wape": 0.009911170361933294,
+      "ratio_to_overall": 0.4690341567849587
+    },
+    {
+      "segment": "hour",
+      "bucket": 2,
+      "n": 546,
+      "wape": 0.011867972550238094,
+      "ratio_to_overall": 0.561637454969763
+    },
+    {
+      "segment": "hour",
+      "bucket": 3,
+      "n": 546,
+      "wape": 0.013206313863789917,
+      "ratio_to_overall": 0.6249728398505661
+    },
+    {
+      "segment": "hour",
+      "bucket": 4,
+      "n": 546,
+      "wape": 0.014573048437197667,
+      "ratio_to_overall": 0.689651901432362
+    },
+    {
+      "segment": "hour",
+      "bucket": 5,
+      "n": 546,
+      "wape": 0.016046377314733577,
+      "ratio_to_overall": 0.7593754096061422
+    },
+    {
+      "segment": "hour",
+      "bucket": 6,
+      "n": 546,
+      "wape": 0.01717723660470173,
+      "ratio_to_overall": 0.8128919585245071
+    },
+    {
+      "segment": "hour",
+      "bucket": 7,
+      "n": 546,
+      "wape": 0.019295860450969506,
+      "ratio_to_overall": 0.9131532710628658
+    },
+    {
+      "segment": "hour",
+      "bucket": 8,
+      "n": 546,
+      "wape": 0.023541247157407755,
+      "ratio_to_overall": 1.1140610651341123
+    },
+    {
+      "segment": "hour",
+      "bucket": 9,
+      "n": 546,
+      "wape": 0.026166315409353446,
+      "ratio_to_overall": 1.238289246982673
+    },
+    {
+      "segment": "hour",
+      "bucket": 10,
+      "n": 546,
+      "wape": 0.02756776522258465,
+      "ratio_to_overall": 1.3046111653254342
+    },
+    {
+      "segment": "hour",
+      "bucket": 11,
+      "n": 546,
+      "wape": 0.02768295964145421,
+      "ratio_to_overall": 1.3100626019517618
+    },
+    {
+      "segment": "hour",
+      "bucket": 12,
+      "n": 546,
+      "wape": 0.029605199574749903,
+      "ratio_to_overall": 1.4010302831970123
+    },
+    {
+      "segment": "hour",
+      "bucket": 13,
+      "n": 546,
+      "wape": 0.030961072497739005,
+      "ratio_to_overall": 1.4651953303022769
+    },
+    {
+      "segment": "hour",
+      "bucket": 14,
+      "n": 546,
+      "wape": 0.03145942332004757,
+      "ratio_to_overall": 1.488779180563024
+    },
+    {
+      "segment": "hour",
+      "bucket": 15,
+      "n": 546,
+      "wape": 0.03024661196953253,
+      "ratio_to_overall": 1.431384349442687
+    },
+    {
+      "segment": "hour",
+      "bucket": 16,
+      "n": 546,
+      "wape": 0.026613381469232655,
+      "ratio_to_overall": 1.2594461078543204
+    },
+    {
+      "segment": "hour",
+      "bucket": 17,
+      "n": 546,
+      "wape": 0.019915651973530245,
+      "ratio_to_overall": 0.9424841556658863
+    },
+    {
+      "segment": "hour",
+      "bucket": 18,
+      "n": 546,
+      "wape": 0.016666305381735788,
+      "ratio_to_overall": 0.788712756009801
+    },
+    {
+      "segment": "hour",
+      "bucket": 19,
+      "n": 546,
+      "wape": 0.017260534486475805,
+      "ratio_to_overall": 0.8168339300892311
+    },
+    {
+      "segment": "hour",
+      "bucket": 20,
+      "n": 546,
+      "wape": 0.018444964766194404,
+      "ratio_to_overall": 0.872885661341081
+    },
+    {
+      "segment": "hour",
+      "bucket": 21,
+      "n": 546,
+      "wape": 0.01969890407856469,
+      "ratio_to_overall": 0.9322268235408582
+    },
+    {
+      "segment": "hour",
+      "bucket": 22,
+      "n": 546,
+      "wape": 0.021737382461064794,
+      "ratio_to_overall": 1.0286953488860124
+    },
+    {
+      "segment": "hour",
+      "bucket": 23,
+      "n": 546,
+      "wape": 0.023449546271750867,
+      "ratio_to_overall": 1.1097214315681605
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 0,
+      "n": 1872,
+      "wape": 0.023269280046065256,
+      "ratio_to_overall": 1.1011905503428716
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 1,
+      "n": 1872,
+      "wape": 0.020445437230713782,
+      "ratio_to_overall": 0.967555602559239
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 2,
+      "n": 1872,
+      "wape": 0.021232192511280685,
+      "ratio_to_overall": 1.0047878451846024
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 3,
+      "n": 1872,
+      "wape": 0.02012670390339484,
+      "ratio_to_overall": 0.9524719331277772
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 4,
+      "n": 1872,
+      "wape": 0.02011621299492775,
+      "ratio_to_overall": 0.9519754635659513
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 5,
+      "n": 1872,
+      "wape": 0.020830243474910696,
+      "ratio_to_overall": 0.9857660929132037
+    },
+    {
+      "segment": "dayofweek",
+      "bucket": 6,
+      "n": 1872,
+      "wape": 0.022030325146662758,
+      "ratio_to_overall": 1.0425585073736807
+    },
+    {
+      "segment": "month",
+      "bucket": 1,
+      "n": 1488,
+      "wape": 0.025343239009691095,
+      "ratio_to_overall": 1.1993381513009793
+    },
+    {
+      "segment": "month",
+      "bucket": 2,
+      "n": 1344,
+      "wape": 0.020168191192959102,
+      "ratio_to_overall": 0.9544352689566925
+    },
+    {
+      "segment": "month",
+      "bucket": 3,
+      "n": 1488,
+      "wape": 0.01945290004210418,
+      "ratio_to_overall": 0.9205849798843191
+    },
+    {
+      "segment": "month",
+      "bucket": 4,
+      "n": 1440,
+      "wape": 0.02071739727392364,
+      "ratio_to_overall": 0.9804257828596465
+    },
+    {
+      "segment": "month",
+      "bucket": 5,
+      "n": 1488,
+      "wape": 0.019292589576265957,
+      "ratio_to_overall": 0.912998480871344
+    },
+    {
+      "segment": "month",
+      "bucket": 6,
+      "n": 1440,
+      "wape": 0.02096199415591143,
+      "ratio_to_overall": 0.9920010346317284
+    },
+    {
+      "segment": "month",
+      "bucket": 7,
+      "n": 744,
+      "wape": 0.014021708789887876,
+      "ratio_to_overall": 0.6635604190811676
+    },
+    {
+      "segment": "month",
+      "bucket": 8,
+      "n": 744,
+      "wape": 0.013179304678780668,
+      "ratio_to_overall": 0.6236946628186266
+    },
+    {
+      "segment": "month",
+      "bucket": 9,
+      "n": 720,
+      "wape": 0.022086898243067407,
+      "ratio_to_overall": 1.0452357607756384
+    },
+    {
+      "segment": "month",
+      "bucket": 10,
+      "n": 744,
+      "wape": 0.025369797100978538,
+      "ratio_to_overall": 1.200594980867815
+    },
+    {
+      "segment": "month",
+      "bucket": 11,
+      "n": 720,
+      "wape": 0.024134625028925785,
+      "ratio_to_overall": 1.1421419556302803
+    },
+    {
+      "segment": "month",
+      "bucket": 12,
+      "n": 744,
+      "wape": 0.028157900225801998,
+      "ratio_to_overall": 1.332538590999242
+    },
+    {
+      "segment": "holiday",
+      "bucket": 0,
+      "n": 12576,
+      "wape": 0.02076290842285829,
+      "ratio_to_overall": 0.9825795429692361
+    },
+    {
+      "segment": "holiday",
+      "bucket": 1,
+      "n": 528,
+      "wape": 0.03048690945036845,
+      "ratio_to_overall": 1.44275613725236
+    }
+  ]
+}

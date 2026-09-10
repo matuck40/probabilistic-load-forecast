@@ -9,6 +9,7 @@ cheaper than a grid and honest about being greedy.
 from __future__ import annotations
 
 import json
+import time
 
 import pandas as pd
 
@@ -26,6 +27,7 @@ SEARCH_ORDER: tuple[tuple[str, tuple], ...] = (
 )
 
 VALIDATION_HORIZON = 12  # one representative horizon, to keep the search affordable
+VALIDATION_FRACTION = 0.15  # the holdout is the tail of the search's own training window
 
 
 def temporal_split(X: pd.DataFrame, y: pd.Series, validation_fraction: float = 0.15):
@@ -46,27 +48,41 @@ def _score(params: dict, X, y, X_val, y_val) -> float:
 
 
 def tune(series: pd.Series, train_end: pd.Timestamp) -> dict:
-    """Coordinate search over the five parameters, scored on a temporal holdout."""
+    """Coordinate search over the five parameters, scored on a temporal holdout.
+
+    The result is a measurement, not a recommendation. `train_end` is whatever
+    the caller passes in; this function does not know, and does not need to
+    know, whether that window overlaps a walk-forward fold's test period. The
+    caller that does know that (the `__main__` block below, which passes the
+    *last* fold's train_end) is the one that stamps the result with whether
+    the chosen parameters may be adopted and why -- see `not_adopted_reason`
+    in the written JSON. The provenance fields returned here (`train_end`,
+    `horizon`, `validation_fraction`, `n_fits`, `seconds`) exist so a later
+    reader can audit what was measured without reading this file.
+    """
+    started = time.perf_counter()
     train = series.loc[:train_end]
     X, y = build_features(train, VALIDATION_HORIZON)
-    X_fit, y_fit, X_val, y_val = temporal_split(X, y)
+    X_fit, y_fit, X_val, y_val = temporal_split(X, y, validation_fraction=VALIDATION_FRACTION)
 
     best = dict(DEFAULT_PARAMS)
     best["n_estimators"] = 1200
     baseline = _score(best, X_fit, y_fit, X_val, y_val)
     history = [{"stage": "defaults", "params": dict(best), "wape": baseline}]
+    n_fits = 1
 
     for name, candidates in SEARCH_ORDER:
         scores = {}
         for value in candidates:
             trial = {**best, name: value}
             scores[value] = _score(trial, X_fit, y_fit, X_val, y_val)
+            n_fits += 1
         chosen = min(scores, key=scores.get)
         best[name] = chosen
         history.append({"stage": name, "chosen": chosen, "scores": {str(k): v for k, v in scores.items()}})
 
-    tuned = history[-1]
     final = _score(best, X_fit, y_fit, X_val, y_val)
+    n_fits += 1
     gain = (baseline - final) / baseline
     return {
         "baseline_wape": baseline,
@@ -74,7 +90,11 @@ def tune(series: pd.Series, train_end: pd.Timestamp) -> dict:
         "relative_gain": gain,
         "params": best,
         "history": history,
-        "note": tuned["stage"],
+        "train_end": str(train_end),
+        "horizon": VALIDATION_HORIZON,
+        "validation_fraction": VALIDATION_FRACTION,
+        "n_fits": n_fits,
+        "seconds": time.perf_counter() - started,
     }
 
 
@@ -82,7 +102,31 @@ if __name__ == "__main__":
     from src.dataset import load_series
     from src.splits import folds
 
-    result = tune(load_series(), folds()[-1].train_end)
+    fold_list = folds()
+    train_end = fold_list[-1].train_end
+    spanned = [f.number for f in fold_list[:-1]]
+
+    result = tune(load_series(), train_end)
+
+    # The search window is everything up to the last fold's train_end, which
+    # is *after* the test periods of every earlier fold. Adopting these
+    # parameters to score those folds would select hyperparameters on data
+    # the model is graded against -- exactly the leakage this project exists
+    # to avoid. The gain is a legitimate, honestly-measured number; the
+    # values are not wired into DEFAULT_PARAMS or any model path.
+    result["adopted"] = False
+    result["not_adopted_reason"] = (
+        f"The search window ends at the last fold's train_end ({train_end}) and "
+        f"therefore spans the test periods of fold(s) {spanned[0]} to {spanned[-1]}, "
+        "so using these parameters to score those folds would select "
+        "hyperparameters on data the model is graded against."
+    )
+    result["comparability_note"] = (
+        "This WAPE is not comparable to the walk-forward numbers in results/metrics.json: "
+        "it scores a single horizon, point forecast only, on a holdout carved from inside "
+        "one training window, not a full walk-forward fold."
+    )
+
     config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     (config.RESULTS_DIR / "tuning.json").write_text(json.dumps(result, indent=2, default=float) + "\n")
     print(f"defaults WAPE {result['baseline_wape']:.4f} -> tuned {result['tuned_wape']:.4f}")

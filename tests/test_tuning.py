@@ -1,7 +1,10 @@
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
 
+from src import config
 from src.tuning import SEARCH_ORDER, temporal_split
 
 
@@ -38,3 +41,19 @@ def test_search_order_matches_the_spec():
     ]
     for _, candidates in SEARCH_ORDER:
         assert len(candidates) >= 2, "a parameter with one candidate is not being searched"
+
+
+def test_tuning_json_records_that_the_tuned_params_were_not_adopted():
+    """The committed artifact must say, on its own, why it must not be used.
+
+    The search window spans the test periods of every fold before the last,
+    so wiring these parameters into the default model and then reporting
+    walk-forward metrics would be leakage. That is a property of how the
+    committed results/tuning.json was produced, not just a comment in the
+    code, so it is asserted here: a future edit that quietly drops the
+    warning breaks this test rather than only a reader's judgement.
+    """
+    data = json.loads((config.RESULTS_DIR / "tuning.json").read_text())
+    assert data["adopted"] is False
+    assert isinstance(data["not_adopted_reason"], str)
+    assert data["not_adopted_reason"].strip() != ""

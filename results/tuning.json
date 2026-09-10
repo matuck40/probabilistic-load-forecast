@@ -75,5 +75,12 @@
       }
     }
   ],
-  "note": "lambda_l2"
+  "train_end": "2026-03-31 23:00:00",
+  "horizon": 12,
+  "validation_fraction": 0.15,
+  "n_fits": 17,
+  "seconds": 150.1435154589999,
+  "adopted": false,
+  "not_adopted_reason": "The search window ends at the last fold's train_end (2026-03-31 23:00:00) and therefore spans the test periods of fold(s) 1 to 5, so using these parameters to score those folds would select hyperparameters on data the model is graded against.",
+  "comparability_note": "This WAPE is not comparable to the walk-forward numbers in results/metrics.json: it scores a single horizon, point forecast only, on a holdout carved from inside one training window, not a full walk-forward fold."
 }

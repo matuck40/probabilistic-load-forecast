@@ -21,13 +21,13 @@ def test_available_lags_respects_the_rule():
 
 
 def test_available_lags_excludes_lags_shorter_than_the_horizon(monkeypatch):
-    """The filter itself must be exercised.
+    """The filter itself must be exercised, independent of whatever LAGS is.
 
-    With the real LAGS (min 24) every horizon (max 24) passes trivially, so
-    `available_lags` could return LAGS unconditionally and the other tests
-    would not notice. Monkeypatch LAGS to include a lag shorter than a chosen
-    horizon and check that it is actually dropped, and that a shorter horizon
-    keeps it.
+    With the real LAGS (min 1) the filter already does real work -- see
+    test_feature_matrices_differ_across_distinct_lag_signatures -- but this
+    test isolates the `>= horizon` rule itself from the current LAGS value by
+    monkeypatching it to a small fixed tuple and checking exactly which lags
+    are kept and dropped at two different horizons.
     """
     monkeypatch.setattr(features, "LAGS", (6, 24, 168))
     assert available_lags(12) == (24, 168)

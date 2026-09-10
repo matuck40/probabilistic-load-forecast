@@ -13,7 +13,9 @@ import pandas as pd
 from src import config
 from src.calendar_features import calendar_frame
 
-# Same hour on the previous day, and on the four previous same weekdays.
+# Hour-by-hour lags for the shortest horizons (1-12), the same hour on the
+# previous day (24), and the same hour on the four previous same weekdays
+# (168, 336, 504, 672).
 LAGS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 168, 336, 504, 672)
 SAME_HOUR_DOW_LAGS = (168, 336, 504, 672)
 SAME_HOUR_7D_LAGS = (24, 48, 72, 96, 120, 144, 168)

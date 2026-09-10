@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src import config
+from src import config, features
 from src.models.gbm import LightGBMForecaster
 
 
@@ -30,13 +30,18 @@ def fitted():
 
 
 def test_fits_one_model_per_distinct_lag_signature_and_quantile(fitted):
-    """Horizons whose available lags coincide are the same learning problem.
+    """Horizons whose full signature coincides are the same learning problem.
 
     With LAGS extended to include 1-12, horizons 1-12 each drop a different
     set of short lags (12 distinct signatures) and horizons 13-24 all reduce
-    to the same signature (24, 168, 336, 504, 672), since every lag under 24
-    is filtered out and the rest are already >= 24. That is 13 signatures, not
-    24 horizons, so the fit count should reflect the smaller number.
+    to the same signature, since every lag under 24 is filtered out of all
+    three lag lists and the rest are already >= 24. That is 13 signatures,
+    not 24 horizons, so the fit count should reflect the smaller number.
+
+    The alpha=0.5 quantile model is not fit at all: predict always reports
+    the point model's output as the median (its final overwrite of "q0.5"
+    discards whatever a quantile model there would have produced), so a
+    quantile model at alpha 0.5 would only ever be thrown away.
     """
     _, model = fitted
     signatures = set(model.signature_of.values())
@@ -44,14 +49,34 @@ def test_fits_one_model_per_distinct_lag_signature_and_quantile(fitted):
     for horizon in config.HORIZONS:
         assert model.model_for(horizon, "point") is not None
         for alpha in config.QUANTILES:
+            if alpha == 0.5:
+                assert (model.signature_of[horizon], "q0.5") not in model.models
+                continue
             assert model.model_for(horizon, f"q{alpha}") is not None
-    assert len(model.models) == 13 * (1 + len(config.QUANTILES))
+    fitted_targets_per_signature = 1 + sum(1 for alpha in config.QUANTILES if alpha != 0.5)
+    assert len(model.models) == 13 * fitted_targets_per_signature
 
 
 def test_horizons_sharing_a_signature_share_the_same_fitted_model(fitted):
     _, model = fitted
     assert model.model_for(13, "point") is model.model_for(24, "point")
     assert model.model_for(1, "point") is not model.model_for(2, "point")
+
+
+def test_signature_reflects_same_hour_7d_lags_not_just_the_main_lags(monkeypatch):
+    """A signature built from the main LAGS alone would miss this case.
+
+    `mean_same_hour_7d` keeps the same column name no matter which lags feed
+    its average, so two horizons whose SAME_HOUR_7D_LAGS differ could still
+    look identical to a signature that only tracks the main lags. Monkeypatch
+    a lag into the middle of the 13-23 gap -- where horizons 13 and 24
+    currently share a signature -- and check that the fix actually splits
+    them: horizon 13 still sees the new lag (20 >= 13) but horizon 24 does
+    not (20 < 24).
+    """
+    monkeypatch.setattr(features, "SAME_HOUR_7D_LAGS", (20, 24, 48, 72, 96, 120, 144, 168))
+    model = LightGBMForecaster(objective="l1")
+    assert model.signature_of[13] != model.signature_of[24]
 
 
 def test_predictions_cover_the_test_index_with_ordered_quantiles(fitted):

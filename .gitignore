@@ -17,5 +17,6 @@ NOTAS-PARA-ENTREVISTA.md
 # Annotated study copies, kept out of the repository
 *_comentado.py
 
-# Planning artifacts, kept locally and not published
+# Planning artifacts and execution scratch, kept locally and not published
 docs/superpowers/
+.superpowers/

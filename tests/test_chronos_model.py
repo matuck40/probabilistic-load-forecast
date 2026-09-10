@@ -58,10 +58,14 @@ def test_importing_the_module_does_not_load_torch():
 
 
 @pytest.mark.slow
-def test_returns_ordered_quantiles_for_one_day(model):
+def test_returns_ordered_quantiles_across_three_consecutive_days(model):
+    """Three days, not one: a day-by-day loop is claimed but never exercised by
+    a single-day test, which an implementation that batched every day against
+    one shared context would also pass."""
     series = _series()
-    test_index = series.index[1008:1032]  # a full day starting at 00:00
+    test_index = series.index[1008:1080]  # three full days starting at 00:00
     assert test_index[0].hour == 0
+    assert len(test_index) == 72
     predictions = model.predict(series, test_index)
     assert predictions.index.equals(test_index)
     assert list(predictions.columns) == ["q0.1", "q0.5", "q0.9"]
@@ -80,6 +84,60 @@ def test_does_not_read_past_the_forecast_origin(model):
     after = model.predict(corrupted, test_index)
 
     pd.testing.assert_frame_equal(baseline, after, check_exact=False, rtol=1e-6)
+
+
+@pytest.mark.slow
+def test_prediction_changes_when_the_context_is_perturbed(model):
+    """The mirror of test_does_not_read_past_the_forecast_origin, and the other
+    half of its safety argument: that test alone would pass trivially for a
+    model that ignores `series` entirely and always returns a constant. This
+    perturbs history strictly BEFORE the origin, inside the fixture's
+    context_length=256-hour window, and requires the median to move. See
+    test_prediction_changes_when_the_context_is_perturbed and
+    test_does_not_read_past_the_forecast_origin together being run against a
+    constant-returning predict() in the fix-round report: the mirror fails and
+    the corruption test still passes, which is what proves the pair
+    discriminates.
+    """
+    series = _series()
+    test_index = series.index[1008:1032]
+    baseline = model.predict(series, test_index)
+
+    perturbed = series.copy()
+    context_start = test_index[0] - pd.Timedelta(hours=256)
+    window = (perturbed.index >= context_start) & (perturbed.index < test_index[0])
+    # Large enough that no reasonable model could ignore it: the series lives
+    # around 30000 +/- 5000 with noise of std 300, so +50000 dwarfs both.
+    perturbed.loc[window] = perturbed.loc[window] + 50000.0
+    after = model.predict(perturbed, test_index)
+
+    assert not np.allclose(baseline["q0.5"].to_numpy(), after["q0.5"].to_numpy())
+
+
+@pytest.mark.slow
+def test_raises_when_a_days_targets_do_not_start_at_midnight(model):
+    """A test_index whose day starts at, say, 06:00 would otherwise have its
+    predictions silently mislabelled: forecast step k is always origin + k
+    hours, and origin is always that day's 00:00, so the first 6 predicted
+    hours would be dropped and the rest shifted -- conservative, not leaking,
+    but wrong, and nothing previously caught it."""
+    series = _series()
+    misaligned = series.index[1014:1032]  # a single day's 06:00 through 23:00
+    assert misaligned[0].hour == 6
+    with pytest.raises(ValueError, match=str(misaligned[0])):
+        model.predict(series, misaligned)
+
+
+@pytest.mark.slow
+def test_predict_is_deterministic_given_the_same_inputs(model):
+    """torch.manual_seed is reset per day inside predict(); nothing pinned
+    that directly until now. A lost reseed would otherwise only ever surface
+    as a confusing failure in the corruption test."""
+    series = _series()
+    test_index = series.index[1008:1032]
+    first = model.predict(series, test_index)
+    second = model.predict(series, test_index)
+    pd.testing.assert_frame_equal(first, second)
 
 
 @pytest.mark.slow

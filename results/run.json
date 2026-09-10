@@ -60,6 +60,9 @@
     }
   ],
   "models": [
+    "chronos_zeroshot",
+    "lightgbm_l1",
+    "lightgbm_l2",
     "naive_168h",
     "naive_24h"
   ],

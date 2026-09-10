@@ -1,4 +1,7 @@
 import json
+import subprocess
+import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -121,3 +124,32 @@ def test_run_metadata_records_provenance(tmp_path):
     assert "pandas" in payload["library_versions"]
     assert len(payload["folds"]) == 6
     assert payload["models"] == ["naive_24h"]
+
+
+def test_importing_run_does_not_load_lightgbm_or_torch():
+    """torch and LightGBM segfault when both are loaded in one process (two
+    independent OpenMP runtimes). --model all and --model chronos both run as
+    `python -m src.run`, which re-imports this module first, so a module-scope
+    LightGBM import here would load lightgbm into every one of those
+    processes even when chronos was the model actually requested -- exactly
+    the bug this test pins. Runs in a real subprocess so it isn't polluted by
+    whatever this process, or an earlier test, has already imported.
+    """
+    repo_root = Path(__file__).resolve().parent.parent
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys\n"
+            "import src.run\n"
+            "print('lightgbm' in sys.modules)\n"
+            "print('torch' in sys.modules)\n",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    lightgbm_loaded, torch_loaded = result.stdout.splitlines()
+    assert lightgbm_loaded == "False", result.stderr
+    assert torch_loaded == "False", result.stderr

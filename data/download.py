@@ -4,6 +4,12 @@ The raw files are large and are never committed. This script fetches them into
 ``data/raw/`` and writes ``data/manifest.json``, which *is* committed, so that a
 reader can obtain byte-identical inputs and verify them.
 
+The manifest separates two timestamps that are easy to conflate. ``retrieved_at``
+is when these bytes were downloaded and changes only on a real download;
+``verified_at`` is when the file on disk was last re-hashed and changes on every
+run. Collapsing them into one field would let a routine re-run overwrite the
+provenance the manifest exists to preserve.
+
 Source: ONS Dados Abertos, "Curva de Carga Horaria"
         https://dados.ons.org.br/dataset/curva-carga
 License: CC BY 4.0 -- attribution to ONS (Operador Nacional do Sistema Eletrico)
@@ -144,8 +150,10 @@ def main(argv: list[str] | None = None) -> int:
 
         if destination.exists() and not args.force:
             print(f"{name}: already present, verifying")
+            downloaded = False
         else:
             print(f"{name}: downloading")
+            downloaded = True
             try:
                 download(url, destination, context)
             except urllib.error.HTTPError as exc:
@@ -159,16 +167,32 @@ def main(argv: list[str] | None = None) -> int:
                 continue
 
         digest = sha256_of(destination)
-        previous = files.get(name, {}).get("sha256")
+        recorded = files.get(name, {})
+        previous = recorded.get("sha256")
         if previous and previous != digest:
             # ONS revises published data; a changed hash is information, not a failure.
             print(f"{name}: contents changed since the last recorded download")
+            downloaded = True  # the bytes on disk are new, whoever put them there
+
+        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        if downloaded:
+            retrieved_at = now
+        else:
+            # The file was already on disk and only re-hashed. Overwriting
+            # retrieved_at here would silently turn "when ONS served these bytes"
+            # into "when I last ran the script", which is the whole point of the
+            # manifest. A file present but absent from the manifest has no known
+            # retrieval time, and null says so rather than inventing one.
+            retrieved_at = recorded.get("retrieved_at")
+            if retrieved_at is None:
+                print(f"{name}: on disk but not in the manifest; retrieval time unknown, use --force")
 
         files[name] = {
             "url": url,
             "sha256": digest,
             "bytes": destination.stat().st_size,
-            "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "retrieved_at": retrieved_at,
+            "verified_at": now,
         }
         print(f"{name}: {destination.stat().st_size:,} bytes  sha256={digest[:16]}...")
 

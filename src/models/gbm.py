@@ -110,7 +110,7 @@ class LightGBMForecaster(Forecaster):
         """The fitted model responsible for `horizon`, found via its signature."""
         return self.models[(self.signature_of[horizon], target)]
 
-    def fit(self, train: pd.Series) -> None:
+    def fit(self, train: pd.Series, early_stopping_rounds: int | None = None) -> None:
         """One model per distinct lag signature, and per quantile except 0.5.
 
         Horizons are visited in order and a signature is only fit the first
@@ -119,7 +119,19 @@ class LightGBMForecaster(Forecaster):
         predict always reports the point model's output as the median (see
         predict's docstring), so a quantile model there would only ever be
         thrown away.
+
+        When early stopping is requested the validation set is the tail of
+        the training window, never a random sample. A random holdout would
+        let the model choose its tree count using hours that sit after hours
+        it trained on, which is the same leak the whole project is built to
+        avoid. The split is applied inside each signature's own fit, not
+        across signatures, and `feature_columns[signature]` is still recorded
+        from the full `X` built for that signature, not the fit-side subset,
+        so predict's column guard keeps comparing against the true trained
+        feature set.
         """
+        from src.tuning import temporal_split
+
         self.models.clear()
         self.feature_columns.clear()
         fitted_signatures: set[Signature] = set()
@@ -130,13 +142,24 @@ class LightGBMForecaster(Forecaster):
             fitted_signatures.add(signature)
             X, y = build_features(train, horizon)
             self.feature_columns[signature] = tuple(X.columns)
-            self.models[(signature, "point")] = self._make(self.objective).fit(X, y)
+
+            if early_stopping_rounds is None:
+                X_fit, y_fit = X, y
+                fit_kwargs = {}
+            else:
+                X_fit, y_fit, X_val, y_val = temporal_split(X, y)
+                fit_kwargs = dict(
+                    eval_set=[(X_val, y_val)],
+                    callbacks=[lgb.early_stopping(early_stopping_rounds, verbose=False)],
+                )
+
+            self.models[(signature, "point")] = self._make(self.objective).fit(X_fit, y_fit, **fit_kwargs)
             if self.quantile:
                 for alpha in config.QUANTILES:
                     if alpha == 0.5:
                         continue
                     key = (signature, f"q{alpha}")
-                    self.models[key] = self._make("quantile", alpha=alpha).fit(X, y)
+                    self.models[key] = self._make("quantile", alpha=alpha).fit(X_fit, y_fit, **fit_kwargs)
 
     def predict(self, series: pd.Series, test_index: pd.DatetimeIndex) -> pd.DataFrame:
         """Predict every target hour, routing each to the model for its horizon.

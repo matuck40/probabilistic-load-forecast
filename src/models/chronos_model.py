@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import torch
 
 from src import config
 from src.models.base import Forecaster
@@ -34,6 +33,10 @@ class ChronosForecaster(Forecaster):
 
     def _load(self):
         if self._pipeline is None:
+            # Imported here, not at module level: torch and LightGBM cannot share a
+            # process on this machine (two independent OpenMP runtimes segfault), so
+            # merely importing this module must not pull torch in.
+            import torch
             from chronos import BaseChronosPipeline
 
             torch.manual_seed(config.SEED)
@@ -49,6 +52,8 @@ class ChronosForecaster(Forecaster):
 
     def predict(self, series: pd.Series, test_index: pd.DatetimeIndex) -> pd.DataFrame:
         """Forecast day by day, each from history strictly before its origin."""
+        import torch  # lazy: see the comment in _load
+
         pipeline = self._load()
         days = sorted({stamp.normalize() for stamp in test_index})
         pieces = []

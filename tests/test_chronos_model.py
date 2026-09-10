@@ -1,10 +1,12 @@
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from src.models.chronos_model import ChronosForecaster
-
-pytest.importorskip("chronos")
 
 
 def _series(n=1200, seed=3):
@@ -20,9 +22,39 @@ def _series(n=1200, seed=3):
 
 @pytest.fixture(scope="module")
 def model():
+    # Deferred to fixture time, not module import time: `chronos` pulls torch in
+    # transitively (chronos/base.py does `import torch`), and torch must never load
+    # merely because this test module was collected -- see
+    # test_importing_the_module_does_not_load_torch below.
+    pytest.importorskip("chronos")
     forecaster = ChronosForecaster(context_length=256, num_samples=8)
     forecaster.fit(_series().iloc[:1000])
     return forecaster
+
+
+def test_importing_the_module_does_not_load_torch():
+    """Torch and LightGBM segfault when both are loaded in one process (two
+    independent OpenMP runtimes). The default (non-slow) suite runs LightGBM's
+    tests too, so importing this module -- which every test file does at
+    collection time, before any -m marker filtering -- must never pull torch in.
+    Runs in a real subprocess so it isn't polluted by whatever this process,
+    or an earlier test, has already imported.
+    """
+    repo_root = Path(__file__).resolve().parent.parent
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys\n"
+            "from src.models.chronos_model import ChronosForecaster\n"
+            "print('torch' in sys.modules)\n",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.stdout.strip() == "False", result.stderr
 
 
 @pytest.mark.slow

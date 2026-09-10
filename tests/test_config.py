@@ -1,6 +1,16 @@
+import importlib.util
+from pathlib import Path
+
 import pandas as pd
 
 from src import config
+
+
+def _load_module_from_path(path: Path, name: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_locked_constants():
@@ -26,3 +36,22 @@ def test_six_folds_are_quarterly_and_ordered():
         previous_end = test_end
     last_test_end = pd.Timestamp(config.FOLDS[-1][2])
     assert last_test_end == pd.Timestamp("2026-06-30 23:00"), "2026Q3 is never evaluated"
+
+
+def test_data_scripts_stay_in_sync_with_config():
+    """audit.py and download.py duplicate these constants on purpose (download.py
+    stays stdlib-only and must not import pandas via src.config), so this test is
+    the only thing standing between them and silent drift."""
+    audit = _load_module_from_path(config.ROOT / "data" / "audit.py", "audit")
+    download = _load_module_from_path(config.ROOT / "data" / "download.py", "download")
+
+    assert audit.TIME_COL == config.TIME_COL
+    assert audit.VALUE_COL == config.VALUE_COL
+    assert audit.ID_COL == config.ID_COL
+    assert audit.RAW_DIR == config.RAW_DIR
+    assert download.RAW_DIR == config.RAW_DIR
+    assert download.MANIFEST_PATH == config.MANIFEST_PATH
+
+
+def test_nominal_coverage_is_80_percent():
+    assert config.NOMINAL_COVERAGE == 0.8

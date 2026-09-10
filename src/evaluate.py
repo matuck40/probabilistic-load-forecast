@@ -30,9 +30,11 @@ def aggregate(per_fold: list[dict]) -> tuple[dict, dict]:
     wins in January and loses in July.
     """
     frame = pd.DataFrame(per_fold)[list(METRIC_KEYS)]
-    # Rounded to 10 decimal places: far more precision than any of these metrics
-    # carries, and enough to absorb float64 summation noise (e.g. (0.10 + 0.20)
-    # / 2 lands one ULP away from the literal 0.15) without changing the value.
+    # Rounded to 10 decimal places: metrics.json is a committed artifact meant
+    # to be diffed and reproduced, and the last bit of a float64 sum is not
+    # portable across CPUs and library builds. 10 decimals is far more
+    # precision than any of these metrics carries, so rounding to it removes
+    # that noise from the artifact without losing anything meaningful.
     return frame.mean().round(10).to_dict(), frame.std(ddof=0).round(10).to_dict()
 
 

@@ -632,5 +632,6 @@
       "wape": 0.03048690945036845,
       "ratio_to_overall": 1.44275613725236
     }
-  ]
+  ],
+  "outcome": "Reverted: the ramp_168 feature moved the targeted segment (hour 14) only 0.4 percent in relative terms (ratio 1.4943 -> 1.4888) while worsening the holiday segment by 3.3 percent (WAPE 0.029515 -> 0.030487), so the change was judged noise with a harmful side effect and reverted; the code in src/features.py and src/models/gbm.py no longer contains it, and this file keeps both the 'before' and 'after' blocks as the record of the attempt."
 }

@@ -44,7 +44,12 @@ def run_model(model: Forecaster, series: pd.Series, fold_list: list[Fold] | None
     for fold in fold_list:
         model.fit(fold.train(series))
         test_index = fold.test_index(series)
-        predictions = model.predict(series, test_index)
+        # Truncated to the fold's own test_end, not the full series: no lag any
+        # model builds ever reaches forward, so nothing past this point is
+        # legitimately needed. This is what makes the boundary a guarantee the
+        # harness enforces rather than a convention that depends on every
+        # model's own tests, including ones written less carefully in future.
+        predictions = model.predict(series.loc[: fold.test_end], test_index)
         scores = evaluate_predictions(series.reindex(test_index), predictions)
         per_fold.append(
             {

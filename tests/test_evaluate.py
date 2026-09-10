@@ -61,10 +61,56 @@ def test_aggregate_rounds_to_ten_decimals_for_stable_diffs():
 
 def test_run_model_scores_every_fold():
     series = _series()
-    result = run_model(SeasonalNaive(lag=24), series, _folds(series))
+    scoring_folds = _folds(series)
+    result = run_model(SeasonalNaive(lag=24), series, scoring_folds)
     assert len(result["per_fold"]) == 2
     assert set(result["mean"]) == {"wape", "mae", "rmse", "pinball", "coverage"}
     assert 0 < result["mean"]["wape"] < 1
+    # A harness that scored the same fold twice (or skipped one) would still
+    # satisfy the two assertions above, so pin the fold identities directly.
+    assert {entry["fold"] for entry in result["per_fold"]} == {fold.number for fold in scoring_folds}
+    by_number = {entry["fold"]: entry for entry in result["per_fold"]}
+    for fold in scoring_folds:
+        entry = by_number[fold.number]
+        assert entry["train_end"] == str(fold.train_end)
+        assert entry["test_start"] == str(fold.test_start)
+        assert entry["test_end"] == str(fold.test_end)
+
+
+class _LastTimestampRecorder:
+    """A stub forecaster that records what it was actually allowed to see.
+
+    Its only job is to prove the harness's boundary, not a model's own good
+    behaviour: predict() records the last timestamp of the series it is
+    handed, so the test can check that run_model never hands a model
+    anything past the fold's test_end.
+    """
+
+    name = "last_timestamp_recorder"
+
+    def __init__(self) -> None:
+        self.seen_last_timestamps: list[pd.Timestamp] = []
+
+    def fit(self, train: pd.Series) -> None:
+        pass
+
+    def predict(self, series: pd.Series, test_index: pd.DatetimeIndex) -> pd.DataFrame:
+        self.seen_last_timestamps.append(series.index[-1])
+        return pd.DataFrame(
+            {"q0.1": 0.0, "q0.5": 0.0, "q0.9": 0.0},
+            index=test_index,
+        )
+
+
+def test_run_model_never_hands_predict_data_past_test_end():
+    series = _series()
+    scoring_folds = _folds(series)
+    model = _LastTimestampRecorder()
+    run_model(model, series, scoring_folds)
+    assert len(model.seen_last_timestamps) == len(scoring_folds)
+    for fold, seen_last in zip(scoring_folds, model.seen_last_timestamps, strict=True):
+        assert seen_last == fold.test_end
+        assert seen_last != series.index[-1]
 
 
 def test_run_metadata_records_provenance(tmp_path):

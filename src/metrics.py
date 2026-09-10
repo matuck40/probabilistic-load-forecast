@@ -58,8 +58,8 @@ def empirical_coverage(y: pd.Series, lower: pd.Series, upper: pd.Series) -> floa
 
 
 def evaluate_predictions(y: pd.Series, predictions: pd.DataFrame) -> dict[str, float]:
-    point = predictions["q0.5"]
-    low, high = config.QUANTILES[0], config.QUANTILES[2]
+    low, mid, high = config.QUANTILES[0], config.QUANTILES[1], config.QUANTILES[2]
+    point = predictions[f"q{mid}"]
     return {
         "wape": wape(y, point),
         "mae": mae(y, point),

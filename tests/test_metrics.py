@@ -6,6 +6,7 @@ from src.metrics import (
     empirical_coverage,
     evaluate_predictions,
     mae,
+    mean_pinball,
     pinball_loss,
     rmse,
     wape,
@@ -54,6 +55,36 @@ def test_empirical_coverage_counts_what_falls_inside():
     lower = pd.Series([0.0, 0.0, 0.0, 0.0])
     upper = pd.Series([10.0, 10.0, 10.0, 10.0])
     assert empirical_coverage(y, lower, upper) == pytest.approx(0.75)
+
+
+def test_empirical_coverage_includes_both_endpoints():
+    # One observation sits exactly on the lower bound, the other exactly on
+    # the upper bound. The interval is closed, so both must count as inside.
+    y = pd.Series([0.0, 10.0])
+    lower = pd.Series([0.0, 0.0])
+    upper = pd.Series([10.0, 10.0])
+    assert empirical_coverage(y, lower, upper) == pytest.approx(1.0)
+
+
+def test_mean_pinball_averages_every_quantile_level():
+    y = pd.Series([10.0, 20.0, 30.0])
+    predictions = pd.DataFrame(
+        {
+            "q0.1": pd.Series([8.0, 25.0, 25.0]),
+            "q0.5": pd.Series([12.0, 15.0, 35.0]),
+            "q0.9": pd.Series([5.0, 20.0, 40.0]),
+        }
+    )
+    loss_low = pinball_loss(y, predictions["q0.1"], alpha=0.1)
+    loss_mid = pinball_loss(y, predictions["q0.5"], alpha=0.5)
+    loss_high = pinball_loss(y, predictions["q0.9"], alpha=0.9)
+    # The three levels must genuinely differ, otherwise returning just one of
+    # them instead of averaging all three would go unnoticed.
+    assert loss_low != pytest.approx(loss_mid)
+    assert loss_mid != pytest.approx(loss_high)
+    assert loss_low != pytest.approx(loss_high)
+    expected = (loss_low + loss_mid + loss_high) / 3
+    assert mean_pinball(y, predictions) == pytest.approx(expected)
 
 
 def test_evaluate_predictions_returns_every_metric():

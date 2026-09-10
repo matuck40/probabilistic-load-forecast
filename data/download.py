@@ -35,7 +35,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DATASET_PAGE = "https://dados.ons.org.br/dataset/curva-carga"
@@ -124,7 +124,10 @@ def load_manifest() -> dict:
         "data_dictionary": {"json": DICTIONARY_JSON, "pdf": DICTIONARY_PDF},
         "columns": {
             "id_subsistema": "subsystem code, 3 characters",
-            "nom_subsistema": "subsystem name; its content changed in dictionary v1.2 (2026-04-06), so join on id_subsistema instead",
+            "nom_subsistema": (
+                "subsystem name; its content changed in dictionary v1.2 "
+                "(2026-04-06), so join on id_subsistema instead"
+            ),
             "din_instante": "reference timestamp, YYYY-MM-DD HH:MM:SS",
             "val_cargaenergiahomwmed": "load in MWmed (mean power over the hour)",
         },
@@ -133,10 +136,19 @@ def load_manifest() -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--years", type=int, nargs="+", default=list(DEFAULT_YEARS),
-                        help=f"years to download (default: {DEFAULT_YEARS[0]}..{DEFAULT_YEARS[-1]})")
-    parser.add_argument("--force", action="store_true", help="re-download even if the file is already present")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--years",
+        type=int,
+        nargs="+",
+        default=list(DEFAULT_YEARS),
+        help=f"years to download (default: {DEFAULT_YEARS[0]}..{DEFAULT_YEARS[-1]})",
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="re-download even if the file is already present"
+    )
     args = parser.parse_args(argv)
 
     manifest = load_manifest()
@@ -174,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{name}: contents changed since the last recorded download")
             downloaded = True  # the bytes on disk are new, whoever put them there
 
-        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        now = datetime.now(UTC).isoformat(timespec="seconds")
         if downloaded:
             retrieved_at = now
         else:

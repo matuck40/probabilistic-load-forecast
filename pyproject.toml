@@ -1,10 +1,6 @@
 [tool.ruff]
 line-length = 110
 target-version = "py312"
-# download.py and audit.py predate this lint config and are committed,
-# frozen deliverables of an earlier task (do not edit); excluded here so
-# `ruff check .` stays clean without touching their content.
-extend-exclude = ["data/download.py", "data/audit.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

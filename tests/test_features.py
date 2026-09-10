@@ -124,6 +124,36 @@ def test_no_leakage_check_catches_a_forward_reading_column_in_a_real_frame():
         )
 
 
+def test_feature_matrices_differ_across_distinct_lag_signatures():
+    """Horizons 1, 2 and 12 each drop a different set of short lags, so their
+    feature matrices must be pairwise distinct, and all three must differ from
+    horizon 13, which is short enough to drop every lag under 24.
+    """
+    series = _series()
+    frames = {h: build_features(series, horizon=h)[0] for h in (1, 2, 12, 13)}
+    for h_a, h_b in [(1, 2), (1, 12), (2, 12), (1, 13), (2, 13), (12, 13)]:
+        assert list(frames[h_a].columns) != list(frames[h_b].columns), (
+            f"horizons {h_a} and {h_b} should not share a lag signature"
+        )
+
+
+def test_feature_matrices_are_identical_for_horizons_13_through_24():
+    """Every lag under 24 is filtered out for horizons 13 and above, and the
+    only lags left (24, 168, 336, 504, 672) are all still >= 24, so horizons 13
+    through 24 see exactly the same information at the forecast origin.
+    """
+    series = _series()
+    reference, _ = build_features(series, horizon=13)
+    for horizon in range(14, 25):
+        X, _ = build_features(series, horizon=horizon)
+        pd.testing.assert_frame_equal(reference, X, check_exact=True)
+
+
+def test_available_lags_extended_range():
+    assert 1 in available_lags(1)
+    assert all(lag >= 24 for lag in available_lags(13))
+
+
 def test_expected_columns_exist_and_no_trigonometric_encoding():
     X, _ = build_features(_series(), horizon=6)
     for column in [

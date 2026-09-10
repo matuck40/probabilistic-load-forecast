@@ -12,7 +12,7 @@ import lightgbm as lgb
 import pandas as pd
 
 from src import config
-from src.features import build_features
+from src.features import available_lags, build_features
 from src.models.base import Forecaster
 
 DEFAULT_PARAMS = {
@@ -37,7 +37,13 @@ class LightGBMForecaster(Forecaster):
         self.quantile = quantile
         self.params = {**DEFAULT_PARAMS, **(params or {})}
         self.name = f"lightgbm_{objective}"
-        self.models: dict[tuple[int, str], lgb.LGBMRegressor] = {}
+        # Horizons whose available_lags() coincide are, at the forecast origin,
+        # the same learning problem: same features, same target values. Fitting
+        # them separately would just retrain an identical model. This maps each
+        # horizon to that signature so the grouping is inspectable and reused
+        # by both fit and predict.
+        self.signature_of: dict[int, tuple[int, ...]] = {h: available_lags(h) for h in config.HORIZONS}
+        self.models: dict[tuple[tuple[int, ...], str], lgb.LGBMRegressor] = {}
 
     def _make(self, objective: str, alpha: float | None = None) -> lgb.LGBMRegressor:
         kwargs = dict(self.params)
@@ -48,22 +54,38 @@ class LightGBMForecaster(Forecaster):
             kwargs["alpha"] = alpha
         return lgb.LGBMRegressor(**kwargs)
 
+    def model_for(self, horizon: int, target: str) -> lgb.LGBMRegressor:
+        """The fitted model responsible for `horizon`, found via its signature."""
+        return self.models[(self.signature_of[horizon], target)]
+
     def fit(self, train: pd.Series) -> None:
-        """One model per horizon, and per quantile, on the training window only."""
+        """One model per distinct lag signature, and per quantile.
+
+        Horizons are visited in order and a signature is only fit the first
+        time it is seen, so horizons that share a signature share the exact
+        same fitted model object.
+        """
         self.models.clear()
+        fitted_signatures: set[tuple[int, ...]] = set()
         for horizon in config.HORIZONS:
+            signature = self.signature_of[horizon]
+            if signature in fitted_signatures:
+                continue
+            fitted_signatures.add(signature)
             X, y = build_features(train, horizon)
-            self.models[(horizon, "point")] = self._make(self.objective).fit(X, y)
+            self.models[(signature, "point")] = self._make(self.objective).fit(X, y)
             if self.quantile:
                 for alpha in config.QUANTILES:
-                    key = (horizon, f"q{alpha}")
+                    key = (signature, f"q{alpha}")
                     self.models[key] = self._make("quantile", alpha=alpha).fit(X, y)
 
     def predict(self, series: pd.Series, test_index: pd.DatetimeIndex) -> pd.DataFrame:
         """Predict every target hour, routing each to the model for its horizon.
 
         Horizon is recoverable from the target hour because the origin is always
-        midnight: hour k of a day is horizon k + 1.
+        midnight: hour k of a day is horizon k + 1. Horizons sharing a signature
+        are routed to the same fitted model, but each horizon's own features
+        (built at its own horizon) are what gets passed in.
         """
         if not self.models:
             raise RuntimeError("call fit before predict")
@@ -79,10 +101,10 @@ class LightGBMForecaster(Forecaster):
             X = X.reindex(targets).dropna()
             if X.empty:
                 continue
-            point.loc[X.index] = self.models[(horizon, "point")].predict(X)
+            point.loc[X.index] = self.model_for(horizon, "point").predict(X)
             if self.quantile:
                 for alpha in config.QUANTILES:
-                    columns[f"q{alpha}"].loc[X.index] = self.models[(horizon, f"q{alpha}")].predict(X)
+                    columns[f"q{alpha}"].loc[X.index] = self.model_for(horizon, f"q{alpha}").predict(X)
 
         if not self.quantile:
             for alpha in config.QUANTILES:

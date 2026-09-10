@@ -38,6 +38,38 @@ def test_bridge_day_is_a_workday_between_a_holiday_and_a_weekend():
     assert frame.loc["2026-04-22 10:00", "is_bridge_day"] == 0.0
 
 
+def test_flags_do_not_depend_on_the_window():
+    # 2025-12-25 is Christmas, so 2025-12-24 is its eve no matter where the
+    # window passed to calendar_frame happens to end.
+    ends_at_the_eve = pd.date_range("2025-12-20", "2025-12-24 23:00", freq="h")
+    ends_later = pd.date_range("2025-12-20", "2025-12-31 23:00", freq="h")
+    assert calendar_frame(ends_at_the_eve).loc["2025-12-24 10:00", "is_holiday_eve"] == 1.0
+    assert calendar_frame(ends_later).loc["2025-12-24 10:00", "is_holiday_eve"] == 1.0
+
+    # 2025-12-25 is a holiday, so 2025-12-26 is the day after no matter where
+    # the window passed to calendar_frame happens to start.
+    starts_the_day_after = pd.date_range("2025-12-26", "2025-12-31 23:00", freq="h")
+    starts_earlier = pd.date_range("2025-12-20", "2025-12-31 23:00", freq="h")
+    assert calendar_frame(starts_the_day_after).loc["2025-12-26 10:00", "is_day_after_holiday"] == 1.0
+    assert calendar_frame(starts_earlier).loc["2025-12-26 10:00", "is_day_after_holiday"] == 1.0
+
+
+def test_first_day_of_the_study_period_follows_a_holiday():
+    # 2020-12-31 (Vespera de Ano-Novo) is in the holiday set even though the
+    # window below starts on 2021-01-01 and never includes it.
+    index = pd.date_range("2021-01-01", "2021-01-02 23:00", freq="h")
+    frame = calendar_frame(index)
+    assert frame.loc["2021-01-01 10:00", "is_day_after_holiday"] == 1.0
+
+
+def test_ordinary_midweek_day_has_no_eve_or_day_after_flag():
+    # 2026-01-14 is a Wednesday with no holiday on either side of it.
+    index = pd.date_range("2026-01-12", "2026-01-16 23:00", freq="h")
+    frame = calendar_frame(index)
+    assert frame.loc["2026-01-14 10:00", "is_holiday_eve"] == 0.0
+    assert frame.loc["2026-01-14 10:00", "is_day_after_holiday"] == 0.0
+
+
 def test_columns_are_float_and_aligned():
     index = pd.date_range("2026-01-01", periods=48, freq="h")
     frame = calendar_frame(index)

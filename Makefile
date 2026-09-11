@@ -1,6 +1,14 @@
 PY := .venv/bin/python
 
-.PHONY: data test lint figures all clean
+.PHONY: setup data test lint figures all clean
+
+# The virtualenv every other target depends on. Nothing else creates it,
+# so this is the first command on a clean machine.
+setup:
+	python3.12 -m venv .venv
+	$(PY) -m pip install --upgrade pip
+	$(PY) -m pip install -r requirements-dev.txt
+
 
 data:
 	$(PY) data/download.py
@@ -27,3 +35,9 @@ all: data lint test
 	$(PY) -m src.run --model lightgbm_l2
 	$(PY) -m src.run --model chronos
 	$(PY) -m src.run --figures
+
+# Caches only. The virtualenv costs an install to rebuild and data/raw costs
+# a full download from ONS, so neither is removed here.
+clean:
+	rm -rf .pytest_cache .ruff_cache
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +

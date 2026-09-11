@@ -98,7 +98,10 @@ def main(argv: list[str] | None = None) -> int:
     if not problems.empty:
         print("\nFAIL: the index is not clean for", ", ".join(problems.subsystem), file=sys.stderr)
         return 1
-    print("\nOK: every subsystem has a gap-free, duplicate-free hourly index with no null or implausible values.")
+    print(
+        "\nOK: every subsystem has a gap-free, duplicate-free hourly index "
+        "with no null or implausible values."
+    )
     return 0
 
 

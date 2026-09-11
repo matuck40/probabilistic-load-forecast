@@ -1,0 +1,77 @@
+{
+  "seed": 42,
+  "python": "3.12.12",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "library_versions": {
+    "pandas": "3.0.5",
+    "numpy": "2.5.3",
+    "lightgbm": "4.7.0",
+    "scikit-learn": "1.9.0",
+    "holidays": "0.104",
+    "torch": "2.14.0"
+  },
+  "subsystem": "SE",
+  "period": [
+    "2021-01-01 00:00:00",
+    "2026-09-08 23:00:00"
+  ],
+  "observations": 49848,
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "folds": [
+    {
+      "fold": 1,
+      "train_end": "2024-12-31 23:00:00",
+      "test_start": "2025-01-01 00:00:00",
+      "test_end": "2025-03-31 23:00:00"
+    },
+    {
+      "fold": 2,
+      "train_end": "2025-03-31 23:00:00",
+      "test_start": "2025-04-01 00:00:00",
+      "test_end": "2025-06-30 23:00:00"
+    },
+    {
+      "fold": 3,
+      "train_end": "2025-06-30 23:00:00",
+      "test_start": "2025-07-01 00:00:00",
+      "test_end": "2025-09-30 23:00:00"
+    },
+    {
+      "fold": 4,
+      "train_end": "2025-09-30 23:00:00",
+      "test_start": "2025-10-01 00:00:00",
+      "test_end": "2025-12-31 23:00:00"
+    },
+    {
+      "fold": 5,
+      "train_end": "2025-12-31 23:00:00",
+      "test_start": "2026-01-01 00:00:00",
+      "test_end": "2026-03-31 23:00:00"
+    },
+    {
+      "fold": 6,
+      "train_end": "2026-03-31 23:00:00",
+      "test_start": "2026-04-01 00:00:00",
+      "test_end": "2026-06-30 23:00:00"
+    }
+  ],
+  "models": [
+    "chronos_zeroshot",
+    "lightgbm_l1",
+    "lightgbm_l2",
+    "naive_168h",
+    "naive_24h"
+  ],
+  "input_sha256": {
+    "CURVA_CARGA_2021.csv": "b5d76ab85a6807479e054c1b3ac6462838ae4d8ced7c42f0f43e2c101b958345",
+    "CURVA_CARGA_2022.csv": "d56a7b23d4f987d862ce8268584907b372d3e79bfc241d5e46fd6bb4ed0fefaa",
+    "CURVA_CARGA_2023.csv": "3a7e07005bd991ade3cccf402b21737564713230f777e1bcda06b9c6e9a78096",
+    "CURVA_CARGA_2024.csv": "0c7e02591887591ec0a1e758eeb744dcd24c69e91c09e032ce7772838676cc32",
+    "CURVA_CARGA_2025.csv": "69a3d2560bf111e46d1fa356ee4be7c917ca89bf53ae16ab1af9f9e7477ff4c4",
+    "CURVA_CARGA_2026.csv": "725b185ccf154a0696c31752b76ecf2b77af7282b883e3ec2dd6dc2d62d3b4c0"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "baseline_wape": 0.02326334636163104,
+  "tuned_wape": 0.022905072900303348,
+  "relative_gain": 0.015400770626817564,
+  "params": {
+    "n_estimators": 1200,
+    "learning_rate": 0.05,
+    "num_leaves": 63,
+    "min_data_in_leaf": 40,
+    "feature_fraction": 1.0,
+    "lambda_l2": 10.0,
+    "verbose": -1,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "history": [
+    {
+      "stage": "defaults",
+      "params": {
+        "n_estimators": 1200,
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "min_data_in_leaf": 40,
+        "feature_fraction": 0.8,
+        "lambda_l2": 1.0,
+        "verbose": -1,
+        "deterministic": true,
+        "force_col_wise": true
+      },
+      "wape": 0.02326334636163104
+    },
+    {
+      "stage": "learning_rate",
+      "chosen": 0.05,
+      "scores": {
+        "0.02": 0.023613081426136752,
+        "0.05": 0.02326334636163104,
+        "0.1": 0.02360139119737758
+      }
+    },
+    {
+      "stage": "num_leaves",
+      "chosen": 63,
+      "scores": {
+        "15": 0.023782216635883986,
+        "31": 0.02326334636163104,
+        "63": 0.02311097360035364
+      }
+    },
+    {
+      "stage": "min_data_in_leaf",
+      "chosen": 40,
+      "scores": {
+        "20": 0.023435661773269213,
+        "40": 0.02311097360035364,
+        "80": 0.02334345904197549
+      }
+    },
+    {
+      "stage": "feature_fraction",
+      "chosen": 1.0,
+      "scores": {
+        "0.6": 0.023751883970622053,
+        "0.8": 0.02311097360035364,
+        "1.0": 0.023009933867865862
+      }
+    },
+    {
+      "stage": "lambda_l2",
+      "chosen": 10.0,
+      "scores": {
+        "0.0": 0.023019553921627602,
+        "1.0": 0.023009933867865862,
+        "10.0": 0.022905072900303348
+      }
+    }
+  ],
+  "train_end": "2026-03-31 23:00:00",
+  "horizon": 12,
+  "validation_fraction": 0.15,
+  "n_fits": 17,
+  "seconds": 150.1435154589999,
+  "adopted": false,
+  "not_adopted_reason": "The search window ends at the last fold's train_end (2026-03-31 23:00:00) and therefore spans the test periods of fold(s) 1 to 5, so using these parameters to score those folds would select hyperparameters on data the model is graded against.",
+  "comparability_note": "This WAPE is not comparable to the walk-forward numbers in results/metrics.json: it scores a single horizon, point forecast only, on a holdout carved from inside one training window, not a full walk-forward fold."
+}

@@ -92,8 +92,9 @@ history rather than deleted.
 
 ## Reproduce
 
-Python 3.12 or 3.13 (the pinned numpy 2.5.3 does not install on 3.11); CI runs
-3.12 and 3.13. The run on record used 3.12.12; library versions and platform are
+Python 3.12 (`make setup` creates a 3.12 virtualenv; the pinned numpy 2.5.3 does
+not install on 3.11). CI runs the fast tests, with no model download and no data,
+on 3.12 and 3.13. The run on record used 3.12.12; library versions and platform are
 captured in `results/run.json`.
 
 ```bash

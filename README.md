@@ -1,5 +1,7 @@
 # Probabilistic load forecasting: does a boosted tree beat the ruler?
 
+[![CI](https://github.com/matuck40/probabilistic-load-forecast/actions/workflows/ci.yml/badge.svg)](https://github.com/matuck40/probabilistic-load-forecast/actions/workflows/ci.yml)
+
 Day-ahead hourly forecasts of Brazilian electricity load, with prediction
 intervals, evaluated the only way that means anything for a time series:
 walk-forward, on data the model had never seen at the moment of the forecast.
@@ -90,7 +92,9 @@ history rather than deleted.
 
 ## Reproduce
 
-Python 3.12. The run on record used 3.12.12; library versions and platform are
+Python 3.12 (`make setup` creates a 3.12 virtualenv; the pinned numpy 2.5.3 does
+not install on 3.11). CI runs the fast tests, with no model download and no data,
+on 3.12 and 3.13. The run on record used 3.12.12; library versions and platform are
 captured in `results/run.json`.
 
 ```bash

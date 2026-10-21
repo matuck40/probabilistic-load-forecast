@@ -16,7 +16,7 @@ The SHA-256 of every input file is recorded in `results/run.json`.
 
 ![Day-ahead forecast for 1 to 7 June 2026: LightGBM median and P10-P90 interval against the observed load](results/figures/week.png)
 
-*One week of day-ahead forecasts, 1 to 7 June 2026: the LightGBM median (P50), its P10-P90 interval and the observed load.*
+*One week of day-ahead forecasts, 1 to 7 June 2026, from the last walk-forward fold (trained to 31 Mar 2026, so out-of-sample): the LightGBM L1 median (P50), its P10-P90 interval and the observed load.*
 
 ---
 
